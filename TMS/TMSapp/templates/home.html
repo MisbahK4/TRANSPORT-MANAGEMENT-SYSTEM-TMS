@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="text-end mb-4">
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">🔐 Login</a>
+  </div>
+
+  <div class="row g-4">
+    {% for package in packages %}
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0 rounded-4">
+        {% if package.images %}
+        <img src="{{ package.images.url }}" class="card-img-top rounded-top-4" style="height: 200px; object-fit: cover;" alt="Package Image">
+        {% endif %}
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary fw-bold">{{ package.title }}</h5>
+
+          <div class="mb-2">
+            <strong>📦 From:</strong> {{ package.pickup_location }}<br>
+            <strong>📍 To:</strong> {{ package.drop_location }}
+          </div>
+
+          <div class="mb-2">
+            <strong>⚖️ Weight:</strong> {{ package.weight }} kg<br>
+            <strong>💰 Price:</strong> ₹{{ package.price_expectation }}
+          </div>
+
+          <!-- Offers -->
+          <div class="mb-3">
+            <strong class="text-success">📩 Offers:</strong>
+            <ul class="list-group mt-2">
+              {% for offer in package.offer_set.all %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                ₹{{ offer.offer_price }}
+                <span class="badge bg-secondary text-light small">
+                  {{ offer.sender.username }} → {{ offer.receiver.username }} ({{ offer.status }})
+                </span>
+              </li>
+              {% empty %}
+              <li class="list-group-item text-muted">No offers yet.</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Offer Form -->
+          <form method="POST" action="{% url 'Offer' %}">
+            {% csrf_token %}
+            <input type="hidden" name="package_id" value="{{ package.id }}">
+            <div class="input-group mb-3">
+              <input type="number" name="offer_price" step="0.01" class="form-control" placeholder="Your offer price" required>
+              <button type="submit" class="btn btn-success">💸 Offer</button>
+            </div>
+          </form>
+
+          <!-- Contact Options -->
+          <div class="mt-auto d-flex gap-2">
+            <a href="tel:{{ package.created_by.phone_no }}" class="btn btn-outline-primary w-50">📞 Call</a>
+            <a href="#" class="btn btn-outline-secondary w-50">💬 Chat</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+

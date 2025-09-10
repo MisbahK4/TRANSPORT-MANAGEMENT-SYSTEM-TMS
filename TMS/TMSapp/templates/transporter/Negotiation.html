@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Packages You're Negotiating</h3>
+  <div class="row">
+    {% for package in packages %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        {% if package.images %}
+        <img src="{{ package.images.url }}" class="card-img-top" alt="{{ package.title }}">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ package.title }}</h5>
+          <p><strong>From:</strong> {{ package.pickup_location }}</p>
+          <p><strong>To:</strong> {{ package.drop_location }}</p>
+          <p><strong>Weight:</strong> {{ package.weight }} KG</p>
+          <p><strong>Expected Price:</strong> ₹{{ package.price_expectation }}</p>
+          <p><strong>Posted by:</strong> {{ package.user.company_name }}</p>
+          <a href="{% url 'Delete_card' package.id %}" type="submit" class="btn btn-danger">DELETE</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+      <p class="mt-3 ml-3">You are not negotiating any packages yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
