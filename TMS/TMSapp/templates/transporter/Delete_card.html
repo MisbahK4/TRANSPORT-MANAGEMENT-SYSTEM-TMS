@@ -1,9 +1,0 @@
-{% comment %} {% extends "base.html" %}
-
-{% block content %}
-<h4>DO YOU DELETE THE FOR NEGOTIATION</h4>
-<form method="POST" action="{% url 'Delete_card' offer.id %}">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-danger">Delete</button>
-</form>
-{% endblock %} {% endcomment %}
