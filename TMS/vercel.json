@@ -2,15 +2,13 @@
   "version": 2,
   "builds": [
     {
-      "src": "manage.py",
+      "src": "TMS/asgi.py",
       "use": "@vercel/python",
       "config": { "maxLambdaSize": "15mb", "runtime": "python3.11" }
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "manage.py"
-    }
+    { "src": "/(.*)", "dest": "TMS/asgi.py" }
   ]
 }
+
