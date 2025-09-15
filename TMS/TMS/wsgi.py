@@ -11,6 +11,9 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "TMS.settings")
+setting_modules = 'TMS.deployee_settings' if 'RENDER_EXTERNAL_HOSTNAME' in os.environ else 'TMS.settings'
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', setting_modules)
+
 
 application = get_wsgi_application()
