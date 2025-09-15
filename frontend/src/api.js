@@ -1,7 +1,13 @@
-import axios from 'axios'
+import axios from "axios";
+
+// Detect environment
+const baseURL =
+  process.env.NODE_ENV === "development"
+    ? process.env.REACT_APP_API_BASE_URL_LOCAL
+    : process.env.REACT_APP_API_BASE_URL_DEPLOY;
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/",
+  baseURL,
 });
 
 // Attach token only if it exists
