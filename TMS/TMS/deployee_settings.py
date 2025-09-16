@@ -23,8 +23,15 @@ MIDDLEWARE = [
 ] 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://transport-management-system-tms-3.onrender.com",
+    "https://transport-management-system-tms-2.onrender.com",  
+    "https://transport-management-system-tms-3.onrender.com" 
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://transport-management-system-tms-2.onrender.com",
+    "https://transport-management-system-tms-3.onrender.com"
+]
+
 
 STORAGES = {
     "default":{
