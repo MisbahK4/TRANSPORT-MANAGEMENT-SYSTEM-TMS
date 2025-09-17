@@ -37,15 +37,14 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 STORAGES = {
-    "default":{
-        "BACKEND":'django.core.files.storage.FileSystemStorage',
-
-        
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
-    "staticfiles":{
-        'BACKEND':"whitenoise.storage.CompressedStaticFilesStorage",
-    }
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
 }
+
 
 DATABASES = {
     'default': dj_database_url.config(
