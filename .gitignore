@@ -1,6 +1,7 @@
 # Python / Django
 *.pyc
 __pycache__/
+/media/
 venv/
 *.log
 
