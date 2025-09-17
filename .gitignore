@@ -1,9 +1,8 @@
 # Python / Django
 *.pyc
 __pycache__/
-/media/
 venv/
 *.log
-.env
+
 /node_modules
 db.sqlite3
