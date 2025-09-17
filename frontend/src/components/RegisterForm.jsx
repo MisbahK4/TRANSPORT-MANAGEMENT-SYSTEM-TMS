@@ -13,6 +13,12 @@ import {
 import { IoEye, IoEyeOff } from "react-icons/io5"; // 👁️ Eye icons
 import { useNavigate } from "react-router-dom";
 
+// ✅ Use same API_BASE logic as LoginForm
+const API_BASE =
+  process.env.NODE_ENV === "development"
+    ? process.env.REACT_APP_API_BASE_URL_LOCAL
+    : process.env.REACT_APP_API_BASE_URL_DEPLOY;
+
 const RegisterForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -51,7 +57,8 @@ const RegisterForm = () => {
       const passRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
       if (!value) error = "Password is required.";
       else if (!passRegex.test(value))
-        error = "Password must be at least 8 chars, include letter, number, and symbol.";
+        error =
+          "Password must be at least 8 chars, include letter, number, and symbol.";
     }
 
     if (name === "password2") {
@@ -64,7 +71,10 @@ const RegisterForm = () => {
       else if (!phoneRegex.test(value)) error = "Enter a valid phone number.";
     }
 
-    if (["company_name", "address", "state", "country"].includes(name) && !value.trim()) {
+    if (
+      ["company_name", "address", "state", "country"].includes(name) &&
+      !value.trim()
+    ) {
       error = `${name.replace("_", " ")} is required.`;
     }
 
@@ -94,7 +104,9 @@ const RegisterForm = () => {
     e.preventDefault();
 
     // run all validations
-    Object.keys(formData).forEach((field) => validateField(field, formData[field]));
+    Object.keys(formData).forEach((field) =>
+      validateField(field, formData[field])
+    );
 
     // check if any errors exist
     if (Object.values(errors).some((err) => err)) {
@@ -103,7 +115,7 @@ const RegisterForm = () => {
     }
 
     try {
-      await axios.post("http://127.0.0.1:8000/api/register/", {
+      await axios.post(`${API_BASE}register/`, {
         ...formData,
         is_owner: formData.role === "owner",
         is_transporter: formData.role === "transporter",
@@ -125,7 +137,10 @@ const RegisterForm = () => {
     } catch (err) {
       console.error(err);
       if (err.response?.data?.username) {
-        setErrors((prev) => ({ ...prev, username: "❌ Username already exists." }));
+        setErrors((prev) => ({
+          ...prev,
+          username: "❌ Username already exists.",
+        }));
       }
       setMessage("❌ Registration failed. Please check your input.");
     }
@@ -154,24 +169,94 @@ const RegisterForm = () => {
         </p>
 
         {message && (
-          <p className="text-center text-sm font-semibold text-red-600 mb-4">{message}</p>
+          <p className="text-center text-sm font-semibold text-red-600 mb-4">
+            {message}
+          </p>
         )}
 
         {/* User Info Section */}
         <Section title="User Information">
-          <Input icon={<FaUser />} label="Username" name="username" value={formData.username} onChange={handleChange} error={errors.username} />
-          <Input icon={<FaEnvelope />} label="Email" name="email" type="email" value={formData.email} onChange={handleChange} error={errors.email} />
-          <PasswordInput icon={<FaLock />} label="Password" name="password" value={formData.password} onChange={handleChange} error={errors.password} show={showPassword} toggle={() => setShowPassword(!showPassword)} />
-          <PasswordInput icon={<FaLock />} label="Confirm Password" name="password2" value={formData.password2} onChange={handleChange} error={errors.password2} show={showPassword2} toggle={() => setShowPassword2(!showPassword2)} />
-          <Input icon={<FaPhone />} label="Phone Number" name="phone_no" value={formData.phone_no} onChange={handleChange} error={errors.phone_no} />
+          <Input
+            icon={<FaUser />}
+            label="Username"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            error={errors.username}
+          />
+          <Input
+            icon={<FaEnvelope />}
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            error={errors.email}
+          />
+          <PasswordInput
+            icon={<FaLock />}
+            label="Password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            error={errors.password}
+            show={showPassword}
+            toggle={() => setShowPassword(!showPassword)}
+          />
+          <PasswordInput
+            icon={<FaLock />}
+            label="Confirm Password"
+            name="password2"
+            value={formData.password2}
+            onChange={handleChange}
+            error={errors.password2}
+            show={showPassword2}
+            toggle={() => setShowPassword2(!showPassword2)}
+          />
+          <Input
+            icon={<FaPhone />}
+            label="Phone Number"
+            name="phone_no"
+            value={formData.phone_no}
+            onChange={handleChange}
+            error={errors.phone_no}
+          />
         </Section>
 
         {/* Company Info Section */}
         <Section title="Company Information">
-          <Input icon={<FaBuilding />} label="Company Name" name="company_name" value={formData.company_name} onChange={handleChange} error={errors.company_name} />
-          <Input icon={<FaMapMarkerAlt />} label="Address" name="address" value={formData.address} onChange={handleChange} error={errors.address} />
-          <Input icon={<FaMapMarkerAlt />} label="State" name="state" value={formData.state} onChange={handleChange} error={errors.state} />
-          <Input icon={<FaGlobe />} label="Country" name="country" value={formData.country} onChange={handleChange} error={errors.country} />
+          <Input
+            icon={<FaBuilding />}
+            label="Company Name"
+            name="company_name"
+            value={formData.company_name}
+            onChange={handleChange}
+            error={errors.company_name}
+          />
+          <Input
+            icon={<FaMapMarkerAlt />}
+            label="Address"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            error={errors.address}
+          />
+          <Input
+            icon={<FaMapMarkerAlt />}
+            label="State"
+            name="state"
+            value={formData.state}
+            onChange={handleChange}
+            error={errors.state}
+          />
+          <Input
+            icon={<FaGlobe />}
+            label="Country"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            error={errors.country}
+          />
         </Section>
 
         {/* ✅ Role Selection (Only one at a time) */}
@@ -199,7 +284,9 @@ const RegisterForm = () => {
             Transporter
           </label>
         </div>
-        {errors.role && <p className="text-red-500 text-sm text-center mb-4">{errors.role}</p>}
+        {errors.role && (
+          <p className="text-red-500 text-sm text-center mb-4">{errors.role}</p>
+        )}
 
         <button
           type="submit"
@@ -225,7 +312,9 @@ const Input = ({ icon, label, name, type = "text", value, onChange, error }) => 
     <label className="block text-gray-700 font-medium mb-1">{label}</label>
     <div
       className={`flex items-center border rounded-lg px-3 py-2 bg-white transition-all duration-300 ${
-        error ? "border-red-500" : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-400"
+        error
+          ? "border-red-500"
+          : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-400"
       }`}
     >
       <span className="text-gray-500 mr-2">{icon}</span>
@@ -244,12 +333,23 @@ const Input = ({ icon, label, name, type = "text", value, onChange, error }) => 
 );
 
 // ✅ Password Input with Eye toggle
-const PasswordInput = ({ icon, label, name, value, onChange, error, show, toggle }) => (
+const PasswordInput = ({
+  icon,
+  label,
+  name,
+  value,
+  onChange,
+  error,
+  show,
+  toggle,
+}) => (
   <div className="mb-4 relative">
     <label className="block text-gray-700 font-medium mb-1">{label}</label>
     <div
       className={`flex items-center border rounded-lg px-3 py-2 bg-white transition-all duration-300 ${
-        error ? "border-red-500" : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-400"
+        error
+          ? "border-red-500"
+          : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-400"
       }`}
     >
       <span className="text-gray-500 mr-2">{icon}</span>
@@ -283,4 +383,3 @@ const Section = ({ title, children }) => (
 );
 
 export default RegisterForm;
-
