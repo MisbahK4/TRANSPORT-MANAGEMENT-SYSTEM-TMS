@@ -4,7 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.exceptions import AuthenticationFailed
 from .models import Package, Chat_Message, Offer, Invoice, Tracking, Vehicle, Staff
-
+from django.utils import timezone
 User = get_user_model()
 
 
@@ -199,13 +199,16 @@ class OfferSerializer(serializers.ModelSerializer):
         fields = [
             "id", "package", "package_id", "sender",
             "offer_price", "status", "changed_by_owner",
-            "created_at",
+            "valid_until", "created_at", "updated_at"
         ]
-        read_only_fields = ["id", "sender", "created_at"]
+        read_only_fields = ["id", "sender", "created_at", "updated_at"]
 
     def create(self, validated_data):
+        user = self.context["request"].user
+        validated_data["sender"] = user
+        # Set offer expiry time (optional — e.g., 24 hours)
+        validated_data.setdefault("valid_until", timezone.now() + timezone.timedelta(hours=24))
         return Offer.objects.create(**validated_data)
-
 
 # -------------------
 # VEHICLE

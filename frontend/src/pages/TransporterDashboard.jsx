@@ -5,10 +5,10 @@ import {
   FaTruck,
   FaUsers,
   FaHome,
+  FaStore,
   FaHandshake,
   FaBox,
   FaShippingFast,
-  FaRoute,
   FaBars,
   FaSearch,
   FaBell,
@@ -19,29 +19,26 @@ import {
 import LogoutButton from "../components/logout";
 
 // transporter sections
-import Vehicles from "../components/TransporterDashComponent/Vehicles";
-import Staff from "../components/TransporterDashComponent/Staff";
-import Negotiations from "../components/TransporterDashComponent/Negotiations";
+import VehicleForm from "../components/TransporterDashComponent/Vehicles";
+import StaffForm from "../components/TransporterDashComponent/Staff";
 import CurrentDeliveries from "../components/TransporterDashComponent/CurrentDeliveries";
 import LoadedPackages from "../components/TransporterDashComponent/LoadedPackages";
-// import OnWayPackages from "../components/TransporterDashComponent/OnWayPackages";
 import ManageVehicleStaff from "../components/TransporterDashComponent/ManageStaffVehicals";
 import Profile from "../components/Profile";
+import Marketplace from "../pages/MarketPlace";
+import TransporterNegotiations from "../components/TransporterDashComponent/Negotiations";
 
-// floating chat + overlay
-import FloatingChatButton from "../components/FloatingChatButton";
-import ChatOverlay from "../components/ChatOverlay";
-
+// ✅ Updated menuItems with proper redirect paths
 const menuItems = [
-  { label: "Home", icon: <FaHome />, redirect: true },
+  { label: "Home", icon: <FaHome />, redirect: true, path: "/" },
   { label: "Profile", icon: <FaUserCircle /> },
+  { label: "MarketPlace", icon: <FaStore />, redirect: true, path: "/marketplace" },
   { label: "Vehicles", icon: <FaTruck /> },
   { label: "Staff", icon: <FaUsers /> },
   { label: "Manage Staff Vehicals", icon: <FaStar /> },
   { label: "Negotiations", icon: <FaHandshake /> },
   { label: "CurrentDeliveries", icon: <FaBox /> },
   { label: "LoadedPackages", icon: <FaShippingFast /> },
-  // { label: "OnWayPackages", icon: <FaRoute /> },
 ];
 
 export default function TransporterDashboard() {
@@ -53,14 +50,14 @@ export default function TransporterDashboard() {
   const renderSection = () => {
     switch (activeSection) {
       case "Profile": return <Profile />;
-      case "Vehicles": return <Vehicles />;
-      case "Staff": return <Staff />;
+      case "Market Place": return <Marketplace />;
+      case "Vehicles": return <VehicleForm />;
+      case "Staff": return <StaffForm />;
       case "Manage Staff Vehicals": return <ManageVehicleStaff />;
-      case "Negotiations": return <Negotiations />;
+      case "Negotiations": return <TransporterNegotiations />;
       case "CurrentDeliveries": return <CurrentDeliveries />;
       case "LoadedPackages": return <LoadedPackages />;
-      // case "OnWayPackages": return <OnWayPackages />;
-      default: return <Vehicles />;
+      default: return <VehicleForm />;
     }
   };
 
@@ -92,10 +89,10 @@ export default function TransporterDashboard() {
 
         {/* Menu */}
         <nav className="space-y-2 px-4">
-          {menuItems.map(({ label, icon, redirect }) => (
+          {menuItems.map(({ label, icon, redirect, path }) => (
             <button
               key={label}
-              onClick={() => (redirect ? navigate("/") : setActiveSection(label))}
+              onClick={() => (redirect ? navigate(path) : setActiveSection(label))}
               className={`flex items-center w-full px-3 py-3 rounded-lg transition-all duration-200 ${
                 activeSection === label
                   ? "bg-green-600 text-white shadow-md"
@@ -151,12 +148,7 @@ export default function TransporterDashboard() {
 
         {/* Section */}
         <section className="p-6 space-y-6">{renderSection()}</section>
-
-        {/* 🔹 Floating Chat + Overlay */}
-        <FloatingChatButton unreadCount={2} onClick={() => setChatOpen(true)} />
-        <ChatOverlay open={chatOpen} onClose={() => setChatOpen(false)} />
       </main>
     </div>
   );
 }
-

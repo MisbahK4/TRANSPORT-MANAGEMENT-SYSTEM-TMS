@@ -8,15 +8,19 @@ import {
   IndianRupee,
   ClipboardCheck,
   Image as ImageIcon,
+  Eye,
   Pencil,
   Trash2,
+  FileText,
+  Download,
 } from "lucide-react";
 
 export default function CurrentPackage() {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [invoiceLoading, setInvoiceLoading] = useState(null);
-  const navigate = useNavigate(); // ✅ for navigation
+  const [imageModal, setImageModal] = useState({ open: false, src: "" });
+  const navigate = useNavigate();
 
   const fetchPackages = async () => {
     try {
@@ -51,12 +55,11 @@ export default function CurrentPackage() {
   };
 
   const handleUpdate = (id) => {
-    navigate(`/UpdatePackage/${id}`); // ✅ React Router navigation
+    navigate(`/UpdatePackage/${id}`);
   };
 
   const generateInvoice = async (pkg) => {
     if (!window.confirm("Generate invoice for this package?")) return;
-
     setInvoiceLoading(pkg.id);
     try {
       const token = localStorage.getItem("token");
@@ -94,14 +97,14 @@ export default function CurrentPackage() {
 
   return (
     <div>
-      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-6 space-y-8">
-        <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3 justify-center">
-          <Package size={28} className="text-indigo-500" />
+      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md p-4 space-y-4">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2 justify-center">
+          <Package size={24} className="text-indigo-500" />
           Current Packages
         </h1>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-md">
-          <table className="min-w-[1000px] w-full bg-white text-sm text-slate-700">
+        <div className="overflow-auto rounded-lg border border-slate-200 shadow-sm">
+          <table className="min-w-full text-sm text-slate-700">
             <thead className="bg-slate-100 sticky top-0 z-10 shadow-sm">
               <tr className="uppercase text-xs text-slate-500 tracking-wide">
                 {[
@@ -117,7 +120,10 @@ export default function CurrentPackage() {
                   "Invoice",
                   "Actions",
                 ].map((heading) => (
-                  <th key={heading} className="py-3 px-4 text-left whitespace-nowrap">
+                  <th
+                    key={heading}
+                    className="py-2 px-3 text-left whitespace-nowrap"
+                  >
                     {heading}
                   </th>
                 ))}
@@ -126,36 +132,43 @@ export default function CurrentPackage() {
             <tbody className="divide-y divide-slate-200">
               {packages.length > 0 ? (
                 packages.map((pkg) => (
-                  <tr key={pkg.id} className="hover:bg-slate-50 transition duration-200">
-                    <td className="py-3 px-4 text-center font-semibold text-slate-600">{pkg.id}</td>
-                    <td className="py-3 px-4 font-medium text-slate-800">{pkg.title || "Untitled"}</td>
-                    <td className="py-3 px-4">
-                      <div className="inline-flex items-center gap-2 text-blue-600">
-                        <MapPin size={16} />
+                  <tr
+                    key={pkg.id}
+                    className="hover:bg-slate-50 transition duration-150"
+                  >
+                    <td className="py-2 px-3 text-center font-semibold text-slate-600">
+                      {pkg.id}
+                    </td>
+                    <td className="py-2 px-3 font-medium text-slate-800">
+                      {pkg.title || "Untitled"}
+                    </td>
+                    <td className="py-2 px-3">
+                      <div className="inline-flex items-center gap-1 text-blue-600">
+                        <MapPin size={14} />
                         {pkg.pickup_location || "N/A"}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="inline-flex items-center gap-2 text-green-600">
-                        <MapPin size={16} />
+                    <td className="py-2 px-3">
+                      <div className="inline-flex items-center gap-1 text-green-600">
+                        <MapPin size={14} />
                         {pkg.drop_location || "N/A"}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="inline-flex items-center gap-2 text-purple-600">
-                        <Weight size={16} />
+                    <td className="py-2 px-3">
+                      <div className="inline-flex items-center gap-1 text-purple-600">
+                        <Weight size={14} />
                         {pkg.weight ? `${pkg.weight} kg` : "N/A"}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="inline-flex items-center gap-2 text-yellow-600">
-                        <IndianRupee size={16} />
+                    <td className="py-2 px-3">
+                      <div className="inline-flex items-center gap-1 text-yellow-600">
+                        <IndianRupee size={14} />
                         ₹{pkg.price_expectation || "0"}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-3 text-center">
                       <span
-                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                           pkg.status === "Available"
                             ? "bg-green-100 text-green-700"
                             : pkg.status === "Booked"
@@ -163,71 +176,82 @@ export default function CurrentPackage() {
                             : "bg-red-100 text-red-700"
                         }`}
                       >
-                        <ClipboardCheck size={14} /> {pkg.status || "Unknown"}
+                        <ClipboardCheck size={12} /> {pkg.status || "Unknown"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-3 text-center">
                       {pkg.images ? (
-                        <img
-                          src={pkg.images}
-                          alt={pkg.title}
-                          className="h-10 w-10 object-cover rounded border shadow mx-auto"
-                        />
+                        <button
+                          type="button"
+                          className="p-1 rounded text-indigo-600 hover:bg-indigo-100 transition"
+                          onClick={() =>
+                            setImageModal({ open: true, src: pkg.images })
+                          }
+                          title="View Image"
+                        >
+                          <Eye size={18} />
+                        </button>
                       ) : (
-                        <div className="flex items-center justify-center gap-1 text-slate-400 italic">
-                          <ImageIcon size={16} /> No image
-                        </div>
+                        <span className="flex items-center justify-center gap-1 text-slate-400 italic">
+                          <ImageIcon size={14} /> No image
+                        </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-xs text-slate-500 text-nowrap">
-                      {pkg.create_at ? new Date(pkg.create_at).toLocaleString() : "—"}
+                    <td className="py-2 px-3 text-xs text-slate-500">
+                      {pkg.create_at
+                        ? new Date(pkg.create_at).toLocaleString()
+                        : "—"}
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-3 text-center">
                       {pkg.status === "Booked" && (
                         <>
                           {!pkg.invoice ? (
                             <button
                               onClick={() => generateInvoice(pkg)}
                               disabled={invoiceLoading === pkg.id}
-                              className="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 text-xs transition"
+                              className="bg-indigo-500 text-white p-1 rounded hover:bg-indigo-600 transition"
+                              title="Generate Invoice"
                             >
-                              {invoiceLoading === pkg.id ? "Generating..." : "Generate Invoice"}
+                              <FileText size={16} />
                             </button>
                           ) : (
                             <button
                               onClick={() => downloadInvoice(pkg.invoice.id)}
-                              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs transition"
+                              className="bg-green-500 text-white p-1 rounded hover:bg-green-600 transition"
+                              title="Download PDF"
                             >
-                              Download PDF
+                              <Download size={16} />
                             </button>
                           )}
                         </>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        {/* ✅ Only show update if NOT booked */}
-                        {pkg.status !== "Booked" && (
-                          <button
-                            onClick={() => handleUpdate(pkg.id)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded flex items-center gap-1 text-xs transition"
-                          >
-                            <Pencil size={14} /> Update
-                          </button>
-                        )}
+                    <td className="py-2 px-3 text-center flex justify-center gap-2">
+                      {pkg.status !== "Booked" && (
                         <button
-                          onClick={() => handleDelete(pkg.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center gap-1 text-xs transition"
+                          onClick={() => handleUpdate(pkg.id)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded transition"
+                          title="Edit Package"
                         >
-                          <Trash2 size={14} /> Delete
+                          <Pencil size={16} />
                         </button>
-                      </div>
+                      )}
+                      <button
+                        onClick={() => handleDelete(pkg.id)}
+                        className="bg-red-500 hover:bg-red-600 text-white p-1 rounded transition"
+                        title="Delete Package"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="12" className="text-center py-6 text-slate-500 italic">
+                  <td
+                    colSpan="12"
+                    className="text-center py-4 text-slate-500 italic"
+                  >
                     No packages found.
                   </td>
                 </tr>
@@ -236,6 +260,31 @@ export default function CurrentPackage() {
           </table>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {imageModal.open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+          onClick={() => setImageModal({ open: false, src: "" })}
+        >
+          <div
+            className="bg-white rounded-lg p-4 shadow-xl max-w-xs w-full flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={imageModal.src}
+              alt="Package"
+              className="w-full h-auto rounded object-cover mb-4"
+            />
+            <button
+              className="bg-indigo-500 mt-2 px-4 py-1 text-white rounded hover:bg-indigo-600 transition"
+              onClick={() => setImageModal({ open: false, src: "" })}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

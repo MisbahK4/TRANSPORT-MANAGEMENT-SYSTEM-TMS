@@ -8,12 +8,10 @@ import {
   FaBuilding,
   FaMapMarkerAlt,
   FaGlobe,
-  FaHome,
 } from "react-icons/fa";
-import { IoEye, IoEyeOff } from "react-icons/io5"; // 👁️ Eye icons
+import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
-// ✅ Use same API_BASE logic as LoginForm
 const API_BASE =
   process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_API_BASE_URL_LOCAL
@@ -21,94 +19,68 @@ const API_BASE =
 
 const RegisterForm = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("user"); // Tab state for mobile
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     password2: "",
-    role: "", // ✅ single role (owner or transporter)
+    role: "",
     company_name: "",
     phone_no: "",
     address: "",
     state: "",
     country: "",
   });
-
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👁️ toggle
-  const [showPassword2, setShowPassword2] = useState(false); // 👁️ toggle
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
 
-  // ✅ validation function
   const validateField = (name, value) => {
     let error = "";
-
-    if (name === "username" && !value.trim()) {
-      error = "Username is required.";
-    }
-
+    if (name === "username" && !value.trim()) error = "Username is required.";
     if (name === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!value) error = "Email is required.";
       else if (!emailRegex.test(value)) error = "Enter a valid email.";
     }
-
     if (name === "password") {
       const passRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
       if (!value) error = "Password is required.";
       else if (!passRegex.test(value))
-        error =
-          "Password must be at least 8 chars, include letter, number, and symbol.";
+        error = "Password must be 8+ chars, include letter, number & symbol.";
     }
-
-    if (name === "password2") {
+    if (name === "password2")
       if (value !== formData.password) error = "Passwords do not match.";
-    }
-
     if (name === "phone_no") {
       const phoneRegex = /^[0-9]{10,15}$/;
       if (!value) error = "Phone number is required.";
       else if (!phoneRegex.test(value)) error = "Enter a valid phone number.";
     }
-
     if (
       ["company_name", "address", "state", "country"].includes(name) &&
       !value.trim()
     ) {
       error = `${name.replace("_", " ")} is required.`;
     }
-
-    if (name === "role" && !value) {
-      error = "Please select a role.";
-    }
-
+    if (name === "role" && !value) error = "Please select a role.";
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  // handle input change
   const handleChange = (e) => {
-    const { name, type, value, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
-
-    if (name === "role") {
-      // ✅ Only one role at a time
-      setFormData((prev) => ({ ...prev, role: value }));
-      validateField("role", value);
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: newValue }));
-      validateField(name, newValue);
-    }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // run all validations
     Object.keys(formData).forEach((field) =>
       validateField(field, formData[field])
     );
 
-    // check if any errors exist
     if (Object.values(errors).some((err) => err)) {
       setMessage("❌ Please fix the errors before submitting.");
       return;
@@ -136,168 +108,262 @@ const RegisterForm = () => {
       setErrors({});
     } catch (err) {
       console.error(err);
-      if (err.response?.data?.username) {
-        setErrors((prev) => ({
-          ...prev,
-          username: "❌ Username already exists.",
-        }));
-      }
       setMessage("❌ Registration failed. Please check your input.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-indigo-200 to-purple-200 flex items-center justify-center p-4 sm:p-8">
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-2xl rounded-2xl p-10 w-full max-w-5xl border border-gray-200"
+        className="bg-white shadow-2xl rounded-3xl p-6 sm:p-10 max-w-4xl w-full animate-fade-in border border-gray-100"
       >
-        {/* ✅ Home Button */}
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-blue-600 hover:text-indigo-700 mb-6 font-medium"
-        >
-          <FaHome className="text-lg" /> Home
-        </button>
-
-        <h2 className="text-4xl font-extrabold text-center text-blue-700 mb-2">
-          Transport Management System
+        <h2 className="text-3xl font-bold text-indigo-700 mb-8 text-center md:text-left">
+          Register Account
         </h2>
-        <p className="text-center text-gray-600 mb-6 text-lg">
-          Register your company and user account
-        </p>
 
-        {message && (
-          <p className="text-center text-sm font-semibold text-red-600 mb-4">
-            {message}
-          </p>
-        )}
-
-        {/* User Info Section */}
-        <Section title="User Information">
-          <Input
-            icon={<FaUser />}
-            label="Username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            error={errors.username}
-          />
-          <Input
-            icon={<FaEnvelope />}
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            error={errors.email}
-          />
-          <PasswordInput
-            icon={<FaLock />}
-            label="Password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            error={errors.password}
-            show={showPassword}
-            toggle={() => setShowPassword(!showPassword)}
-          />
-          <PasswordInput
-            icon={<FaLock />}
-            label="Confirm Password"
-            name="password2"
-            value={formData.password2}
-            onChange={handleChange}
-            error={errors.password2}
-            show={showPassword2}
-            toggle={() => setShowPassword2(!showPassword2)}
-          />
-          <Input
-            icon={<FaPhone />}
-            label="Phone Number"
-            name="phone_no"
-            value={formData.phone_no}
-            onChange={handleChange}
-            error={errors.phone_no}
-          />
-        </Section>
-
-        {/* Company Info Section */}
-        <Section title="Company Information">
-          <Input
-            icon={<FaBuilding />}
-            label="Company Name"
-            name="company_name"
-            value={formData.company_name}
-            onChange={handleChange}
-            error={errors.company_name}
-          />
-          <Input
-            icon={<FaMapMarkerAlt />}
-            label="Address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            error={errors.address}
-          />
-          <Input
-            icon={<FaMapMarkerAlt />}
-            label="State"
-            name="state"
-            value={formData.state}
-            onChange={handleChange}
-            error={errors.state}
-          />
-          <Input
-            icon={<FaGlobe />}
-            label="Country"
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            error={errors.country}
-          />
-        </Section>
-
-        {/* ✅ Role Selection (Only one at a time) */}
-        <div className="flex gap-10 justify-center mb-6">
-          <label className="flex items-center gap-2 text-gray-700 font-medium">
-            <input
-              type="radio"
-              name="role"
-              value="owner"
-              checked={formData.role === "owner"}
-              onChange={handleChange}
-              className="accent-blue-600"
-            />
-            Owner
-          </label>
-          <label className="flex items-center gap-2 text-gray-700 font-medium">
-            <input
-              type="radio"
-              name="role"
-              value="transporter"
-              checked={formData.role === "transporter"}
-              onChange={handleChange}
-              className="accent-green-600"
-            />
-            Transporter
-          </label>
+        {/* Role Buttons */}
+        <div className="flex justify-center md:justify-start gap-4 mb-6 flex-wrap">
+          {["owner", "transporter"].map((role) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, role }))}
+              className={`px-6 py-2 rounded-full font-medium transition shadow-md whitespace-nowrap ${
+                formData.role === role
+                  ? role === "owner"
+                    ? "bg-blue-600 text-white"
+                    : "bg-green-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {role.charAt(0).toUpperCase() + role.slice(1)}
+            </button>
+          ))}
         </div>
         {errors.role && (
-          <p className="text-red-500 text-sm text-center mb-4">{errors.role}</p>
+          <p className="text-red-500 text-center md:text-left mb-6">{errors.role}</p>
         )}
+
+        {/* Tab Navigation For Mobile */}
+        <div className="block md:hidden mb-6 border-b border-gray-300">
+          <nav className="flex justify-center gap-6">
+            <button
+              type="button"
+              onClick={() => setActiveTab("user")}
+              className={`pb-2 font-semibold ${
+                activeTab === "user"
+                  ? "border-b-4 border-indigo-600 text-indigo-700"
+                  : "text-gray-600 hover:text-indigo-600"
+              }`}
+            >
+              User Info
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("company")}
+              className={`pb-2 font-semibold ${
+                activeTab === "company"
+                  ? "border-b-4 border-indigo-600 text-indigo-700"
+                  : "text-gray-600 hover:text-indigo-600"
+              }`}
+            >
+              Company Info
+            </button>
+          </nav>
+        </div>
+
+        {/* Responsive Layout */}
+        <div className="hidden md:grid grid-cols-2 gap-6">
+          {/* Desktop: show all fields in two columns */}
+          <div className="space-y-6">
+            <Input
+              icon={<FaUser />}
+              label="Username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              error={errors.username}
+            />
+            <Input
+              icon={<FaEnvelope />}
+              label="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+            />
+            <PasswordInput
+              icon={<FaLock />}
+              label="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              error={errors.password}
+              show={showPassword}
+              toggle={() => setShowPassword(!showPassword)}
+            />
+            <PasswordInput
+              icon={<FaLock />}
+              label="Confirm Password"
+              name="password2"
+              value={formData.password2}
+              onChange={handleChange}
+              error={errors.password2}
+              show={showPassword2}
+              toggle={() => setShowPassword2(!showPassword2)}
+            />
+            <Input
+              icon={<FaPhone />}
+              label="Phone Number"
+              name="phone_no"
+              value={formData.phone_no}
+              onChange={handleChange}
+              error={errors.phone_no}
+            />
+          </div>
+          <div className="space-y-6">
+            <Input
+              icon={<FaBuilding />}
+              label="Company Name"
+              name="company_name"
+              value={formData.company_name}
+              onChange={handleChange}
+              error={errors.company_name}
+            />
+            <Input
+              icon={<FaMapMarkerAlt />}
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              error={errors.address}
+            />
+            <Input
+              icon={<FaMapMarkerAlt />}
+              label="State"
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              error={errors.state}
+            />
+            <Input
+              icon={<FaGlobe />}
+              label="Country"
+              name="country"
+              value={formData.country}
+              onChange={handleChange}
+              error={errors.country}
+            />
+          </div>
+        </div>
+
+        {/* Mobile: show fields by active tab */}
+        <div className="md:hidden space-y-6">
+          {activeTab === "user" && (
+            <>
+              <Input
+                icon={<FaUser />}
+                label="Username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                error={errors.username}
+              />
+              <Input
+                icon={<FaEnvelope />}
+                label="Email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                error={errors.email}
+              />
+              <PasswordInput
+                icon={<FaLock />}
+                label="Password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                error={errors.password}
+                show={showPassword}
+                toggle={() => setShowPassword(!showPassword)}
+              />
+              <PasswordInput
+                icon={<FaLock />}
+                label="Confirm Password"
+                name="password2"
+                value={formData.password2}
+                onChange={handleChange}
+                error={errors.password2}
+                show={showPassword2}
+                toggle={() => setShowPassword2(!showPassword2)}
+              />
+              <Input
+                icon={<FaPhone />}
+                label="Phone Number"
+                name="phone_no"
+                value={formData.phone_no}
+                onChange={handleChange}
+                error={errors.phone_no}
+              />
+            </>
+          )}
+
+          {activeTab === "company" && (
+            <>
+              <Input
+                icon={<FaBuilding />}
+                label="Company Name"
+                name="company_name"
+                value={formData.company_name}
+                onChange={handleChange}
+                error={errors.company_name}
+              />
+              <Input
+                icon={<FaMapMarkerAlt />}
+                label="Address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                error={errors.address}
+              />
+              <Input
+                icon={<FaMapMarkerAlt />}
+                label="State"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                error={errors.state}
+              />
+              <Input
+                icon={<FaGlobe />}
+                label="Country"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                error={errors.country}
+              />
+            </>
+          )}
+        </div>
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-full font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300"
+          disabled={!formData.role}
+          className={`mt-8 w-full py-3 rounded-full font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 ${
+            formData.role === "owner"
+              ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+              : formData.role === "transporter"
+              ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
         >
-          Register Account
+          Register
         </button>
 
-        <p className="text-center text-sm mt-6 text-gray-600">
+        <p className="text-center text-gray-600 mt-6">
           Already registered?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <a href="/login" className="text-indigo-600 hover:underline">
             Login here
           </a>
         </p>
@@ -306,7 +372,6 @@ const RegisterForm = () => {
   );
 };
 
-// ✅ Input Component
 const Input = ({ icon, label, name, type = "text", value, onChange, error }) => (
   <div className="mb-4">
     <label className="block text-gray-700 font-medium mb-1">{label}</label>
@@ -314,25 +379,23 @@ const Input = ({ icon, label, name, type = "text", value, onChange, error }) => 
       className={`flex items-center border rounded-lg px-3 py-2 bg-white transition-all duration-300 ${
         error
           ? "border-red-500"
-          : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-400"
+          : "border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400"
       }`}
     >
-      <span className="text-gray-500 mr-2">{icon}</span>
+      <span className="text-gray-400 mr-2">{icon}</span>
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
-        required
-        className="w-full bg-transparent outline-none text-gray-700"
         placeholder={`Enter ${label.toLowerCase()}`}
+        className="w-full outline-none bg-transparent text-gray-700"
       />
     </div>
     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
   </div>
 );
 
-// ✅ Password Input with Eye toggle
 const PasswordInput = ({
   icon,
   label,
@@ -343,42 +406,34 @@ const PasswordInput = ({
   show,
   toggle,
 }) => (
-  <div className="mb-4 relative">
+  <div className="relative mb-4">
     <label className="block text-gray-700 font-medium mb-1">{label}</label>
     <div
       className={`flex items-center border rounded-lg px-3 py-2 bg-white transition-all duration-300 ${
         error
           ? "border-red-500"
-          : "border-gray-300 focus-within:ring-2 focus-within:ring-blue-400"
+          : "border-gray-300 focus-within:ring-2 focus-within:ring-indigo-400"
       }`}
     >
-      <span className="text-gray-500 mr-2">{icon}</span>
+      <span className="text-gray-400 mr-2">{icon}</span>
       <input
         type={show ? "text" : "password"}
         name={name}
         value={value}
         onChange={onChange}
-        required
-        className="w-full bg-transparent outline-none text-gray-700"
         placeholder={`Enter ${label.toLowerCase()}`}
+        className="w-full outline-none bg-transparent text-gray-700"
       />
       <button
         type="button"
         onClick={toggle}
         className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+        aria-label={show ? "Hide password" : "Show password"}
       >
         {show ? <IoEyeOff /> : <IoEye />}
       </button>
     </div>
     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-  </div>
-);
-
-// ✅ Section wrapper
-const Section = ({ title, children }) => (
-  <div className="mb-8">
-    <h3 className="text-xl font-semibold text-gray-700 mb-4">{title}</h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">{children}</div>
   </div>
 );
 

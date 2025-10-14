@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum, Q
 from django.contrib.auth import authenticate, login
+from django.utils import timezone
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -162,91 +163,107 @@ class OfferViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Only show offers where user is sender or receiver"""
         user = self.request.user
         return self.queryset.filter(Q(sender=user) | Q(receiver=user))
 
     def perform_create(self, serializer):
-        """When creating an offer, set sender and receiver"""
         package = serializer.validated_data["package"]
-        serializer.save(
-            sender=self.request.user,
-            receiver=package.user
-        )
+        serializer.save(sender=self.request.user, receiver=package.user)
 
-    # ----------------- Actions ----------------- #
-
+    # ✅ OWNER ACCEPTS OFFER → start timer + lock others
     @action(detail=True, methods=["post"])
     def accept(self, request, pk=None):
-        """Owner accepts an offer → package booked"""
         offer = self.get_object()
-        offer.status = "accepted"
-        offer.changed_by_owner = False
-        offer.save()
-
         package = offer.package
-        package.status = "Booked"
-        package.booked_by = offer.sender
-        package.price_expectation = offer.offer_price  # ✅ final agreed price
-        package.save()
 
-        return Response({"message": "Offer accepted and package booked."}, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["post"])
-    def reject(self, request, pk=None):
-        """Owner rejects an offer"""
-        offer = self.get_object()
-        offer.status = "rejected"
-        offer.changed_by_owner = False
-        offer.save()
-        return Response({"message": "Offer rejected."}, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["post"])
-    def counter(self, request, pk=None):
-        """Owner OR Transporter sends counter-offer"""
-        offer = self.get_object()
-
-        # Only sender or receiver can counter
-        if request.user not in [offer.sender, offer.receiver]:
-            return Response({"error": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
-
-        new_price = request.data.get("offer_price")
-        if not new_price:
-            return Response({"error": "New offer price required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        offer.offer_price = new_price
-        offer.status = "pending"
-        offer.changed_by_owner = (request.user == offer.receiver)  # ✅ True if owner countered
+        offer.status = "accepted_by_owner"
+        offer.valid_until = timezone.now() + timezone.timedelta(minutes=5)
         offer.save()
 
-        return Response(
-            {"message": "Counter offer sent.", "offer_price": new_price},
-            status=status.HTTP_200_OK
-        )
+        Offer.objects.filter(package=package).exclude(id=offer.id).update(status="locked")
 
-    @action(detail=False, methods=["get"])
-    def my_offers(self, request):
-        """Return offers created by the logged-in user"""
-        offers = self.queryset.filter(sender=request.user)
-        serializer = self.get_serializer(offers, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["post"])
-    def book(self, request, pk=None):
-        """Transporter finalizes booking AFTER owner accepts"""
-        offer = self.get_object()
-        if offer.status != "accepted":
-            return Response({"error": "Only accepted offers can be booked."}, status=status.HTTP_400_BAD_REQUEST)
-
-        package = offer.package
-        package.status = "Booked"
+        package.status = "Accepted - Awaiting Confirmation"
         package.booked_by = offer.sender
         package.price_expectation = offer.offer_price
         package.save()
 
-        return Response({"message": "Booking finalized."}, status=status.HTTP_200_OK)
+        return Response({"message": "Offer accepted. Timer started (5 min)."}, status=200)
+
+    # ✅ CHECK IF EXPIRED → unlock all
+    @action(detail=True, methods=["post"])
+    def expire_and_unlock(self, request, pk=None):
+        offer = self.get_object()
+        package = offer.package
+
+        if offer.status == "accepted_by_owner" and offer.is_expired():
+            offer.status = "expired"
+            offer.save()
+
+            Offer.objects.filter(package=package, status__in=["locked", "rejected"]).update(status="reopened")
+
+            package.status = "Open for Offers"
+            package.booked_by = None
+            package.save()
+
+            return Response({"message": "Offer expired. Other offers reopened."}, status=200)
+
+        return Response({"message": "Offer not expired yet."}, status=200)
+
+    # ✅ TRANSPORTER CONFIRMS → booked
+    @action(detail=True, methods=["post"])
+    def confirm(self, request, pk=None):
+        offer = self.get_object()
+        if offer.status != "accepted_by_owner":
+            return Response({"error": "Only accepted offers can be confirmed."}, status=400)
+
+        offer.status = "confirmed_by_transporter"
+        offer.save()
+
+        package = offer.package
+        package.status = "Booked"
+        package.booked_by = offer.sender
+        package.save()
+
+        return Response({"message": "Transporter confirmed. Package booked."}, status=200)
+
+    # ✅ REJECT OFFER
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        offer = self.get_object()
+        offer.status = "rejected"
+        offer.save()
+        return Response({"message": "Offer rejected."}, status=200)
+
+    # ✅ COUNTER OFFER
+    @action(detail=True, methods=["post"])
+    def counter(self, request, pk=None):
+        offer = self.get_object()
+        user = request.user
+        new_price = request.data.get("offer_price")
+
+        if not new_price:
+            return Response({"error": "New offer price required."}, status=400)
+
+        if user not in [offer.sender, offer.receiver]:
+            return Response({"error": "Not allowed."}, status=403)
+
+        if user == offer.receiver:
+            offer.sender, offer.receiver = offer.receiver, offer.sender
+
+        offer.offer_price = new_price
+        offer.status = "pending"
+        offer.valid_until = None  # Reset timer until next accept
+        offer.save()
+
+        return Response({"message": "Counter offer sent."}, status=200)
+
+    @action(detail=False, methods=["get"])
+    def my_offers(self, request):
+        user = request.user
+        offers = self.queryset.filter(Q(sender=user) | Q(receiver=user)).select_related("package")
+        serializer = self.get_serializer(offers, many=True)
+        return Response(serializer.data, status=200)
     
-# ✅ Chat Messages CRUD
 class ChatMessageViewSet(viewsets.ModelViewSet):
     queryset = Chat_Message.objects.all().order_by("timestamp")
     serializer_class = ChatMessageSerializer

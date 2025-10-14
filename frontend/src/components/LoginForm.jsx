@@ -78,7 +78,7 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
           className="w-full max-w-md bg-white shadow-xl rounded-xl p-8 space-y-6 border border-gray-200"
         >
           <h2 className="text-3xl font-bold text-gray-800 text-center">TMS Login</h2>
-          <p className="text-center text-gray-500">Access your transport dashboard</p>
+          <p className="text-center text-gray-500">Open your dashboard</p>
 
           {errors.general && (
             <div className="bg-red-100 text-red-700 px-4 py-2 rounded text-sm text-center">

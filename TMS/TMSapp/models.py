@@ -79,27 +79,48 @@ class Offer(models.Model):
     package = models.ForeignKey(Package, on_delete=models.CASCADE, related_name="offers")
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_offers")
     receiver = models.ForeignKey(
-    User,
-    on_delete=models.CASCADE,
-    related_name="received_offers",
-    null=True,      
-    blank=True,     
-)
+        User,
+        on_delete=models.CASCADE,
+        related_name="received_offers",
+        null=True,
+        blank=True,
+    )
 
     offer_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(
-        max_length=20,
-        choices=[("pending", "Pending"), ("accepted", "Accepted"), ("rejected", "Rejected")],
-        default="pending",
-    )
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("accepted_by_owner", "Accepted by Owner"),
+        ("confirmed_by_transporter", "Confirmed by Transporter"),
+        ("rejected", "Rejected"),
+        ("cancelled", "Cancelled"),
+        ("expired", "Expired"),
+        ("reopened", "Reopened"),
+        ("locked", "Locked"),
+    ]
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="pending")
+
     changed_by_owner = models.BooleanField(default=False)
+    valid_until = models.DateTimeField(null=True, blank=True)  # Offer validity
+    reopened_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reopened_offers"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def is_expired(self):
+        return self.valid_until and timezone.now() > self.valid_until
 
     def __str__(self):
         return f"Offer {self.id} - {self.package.title} ({self.status})"
 
 
+# ✅ Invoice Model
 def generate_invoice_number():
     return f"INV-{uuid.uuid4().hex[:8].upper()}"
 
