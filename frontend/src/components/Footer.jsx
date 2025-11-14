@@ -187,7 +187,7 @@ const Footer = () => (
       </div>
 
       {/* Accessibility Note */}
-      <div className="mt-12 p-4 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50 text-center text-sm text-gray-400">
+      {/* <div className="mt-12 p-4 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50 text-center text-sm text-gray-400">
         If you have a disability and are having trouble accessing information or need materials in an alternate format, email
         <a
           href="mailto:support@truckbase.com"
@@ -196,14 +196,14 @@ const Footer = () => (
           support@truckbase.com
         </a>{" "}
         for assistance.
-      </div>
+      </div> */}
     </div>
 
     {/* Bottom Note */}
     <div className="relative z-10 mt-8 pt-6 border-t border-gray-800/50">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
         &copy; {new Date().getFullYear()}{" "}
-        <span className="font-semibold text-gray-300">TruckBase TMS</span>. All rights reserved.
+        <span className="font-semibold text-gray-300">TruckBase TMS</span>. Created by Mohd Misbah Khan.
       </div>
     </div>
   </footer>

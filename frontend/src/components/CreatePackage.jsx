@@ -10,11 +10,25 @@ import {
   Image,
 } from "lucide-react";
 
+// Desktop Field Component
 const Field = ({ icon: Icon, label, children }) => (
   <div className="space-y-1">
     <label className="flex items-center gap-2 text-xs font-medium text-slate-700">
       <span className="bg-indigo-100 text-indigo-600 p-1.5 rounded-full">
         <Icon size={16} />
+      </span>
+      {label}
+    </label>
+    {children}
+  </div>
+);
+
+// Mobile Field Component (smaller)
+const MobileField = ({ icon: Icon, label, children }) => (
+  <div className="space-y-1">
+    <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700">
+      <span className="bg-indigo-100 text-indigo-600 p-1 rounded-full">
+        <Icon size={14} />
       </span>
       {label}
     </label>
@@ -91,15 +105,15 @@ const CreatePackage = () => {
   };
 
   return (
-    <div className="px-4 py-10">
-      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-8 space-y-10 animate-fade-in">
+    <div className="px-4 py-6 sm:py-10">
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-8 animate-fade-in">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
           <div className="inline-block bg-gradient-to-tr from-indigo-500 to-blue-500 text-white p-4 rounded-full shadow-lg">
             <Send size={28} />
           </div>
-          <h2 className="text-3xl font-bold text-slate-800">Create Shipment</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-800">Create Shipment</h2>
+          <p className="text-sm text-slate-500 max-w-md mx-auto">
             Fill in the details to dispatch your package
           </p>
         </div>
@@ -218,120 +232,160 @@ const CreatePackage = () => {
           </button>
         </form>
 
-        {/* ✅ Mobile Form (Compact & Clean) */}
+        {/* ✅ Mobile Form (Compact & Improved) */}
         <form onSubmit={handleSubmit} className="space-y-4 block md:hidden">
-          {/* Title & Weight */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field icon={Package} label="Title">
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Electronics"
-                className="w-full border border-slate-300 px-2 py-2 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-            </Field>
-            <Field icon={Weight} label="Weight">
+          {/* Package Info Card */}
+          <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-4 shadow-sm border border-indigo-100">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="bg-indigo-500 p-1.5 rounded-lg">
+                <Package size={16} className="text-white" />
+              </div>
+              <h3 className="text-base font-bold text-indigo-800">Package Details</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <MobileField icon={Package} label="Title">
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="e.g. Electronics"
+                  className="w-full border border-slate-300 px-3 py-2 rounded-md text-sm focus:ring-1 focus:ring-indigo-500"
+                  required
+                />
+              </MobileField>
+              
+              <MobileField icon={Weight} label="Weight (kg)">
+                <input
+                  type="number"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  placeholder="e.g. 12.5"
+                  className="w-full border border-slate-300 px-3 py-2 rounded-md text-sm focus:ring-1 focus:ring-indigo-500"
+                  required
+                />
+              </MobileField>
+              
+              <MobileField icon={FileText} label="Description">
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={2}
+                  placeholder="Package contents"
+                  className="w-full border border-slate-300 px-3 py-2 rounded-md text-sm focus:ring-1 focus:ring-indigo-500"
+                  required
+                />
+              </MobileField>
+            </div>
+          </div>
+
+          {/* Locations Card */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 shadow-sm border border-blue-100">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="bg-blue-500 p-1.5 rounded-lg">
+                <MapPin size={16} className="text-white" />
+              </div>
+              <h3 className="text-base font-bold text-blue-800">Locations</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <MobileField icon={MapPin} label="Pickup">
+                <input
+                  type="text"
+                  name="pickup_location"
+                  value={formData.pickup_location}
+                  onChange={handleChange}
+                  placeholder="e.g. Mumbai"
+                  className="w-full border border-slate-300 px-3 py-2 rounded-md text-sm focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </MobileField>
+
+              <MobileField icon={MapPin} label="Drop">
+                <input
+                  type="text"
+                  name="drop_location"
+                  value={formData.drop_location}
+                  onChange={handleChange}
+                  placeholder="e.g. Delhi"
+                  className="w-full border border-slate-300 px-3 py-2 rounded-md text-sm focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </MobileField>
+            </div>
+          </div>
+
+          {/* Pricing Card */}
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 shadow-sm border border-amber-100">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="bg-amber-500 p-1.5 rounded-lg">
+                <IndianRupee size={16} className="text-white" />
+              </div>
+              <h3 className="text-base font-bold text-amber-800">Pricing</h3>
+            </div>
+            
+            <MobileField icon={IndianRupee} label="Price (₹)">
               <input
                 type="number"
-                name="weight"
-                value={formData.weight}
+                name="price_expectation"
+                value={formData.price_expectation}
                 onChange={handleChange}
-                placeholder="kg"
-                className="w-full border border-slate-300 px-2 py-2 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                placeholder="e.g. 1500"
+                className="w-full border border-slate-300 px-3 py-2 rounded-md text-sm focus:ring-1 focus:ring-amber-500"
                 required
               />
-            </Field>
+            </MobileField>
           </div>
 
-          {/* Pickup & Drop */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field icon={MapPin} label="Pickup">
-              <input
-                type="text"
-                name="pickup_location"
-                value={formData.pickup_location}
-                onChange={handleChange}
-                placeholder="Mumbai"
-                className="w-full border border-slate-300 px-2 py-2 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-            </Field>
-            <Field icon={MapPin} label="Drop">
-              <input
-                type="text"
-                name="drop_location"
-                value={formData.drop_location}
-                onChange={handleChange}
-                placeholder="Delhi"
-                className="w-full border border-slate-300 px-2 py-2 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-            </Field>
-          </div>
-
-          {/* Price */}
-          <Field icon={IndianRupee} label="Price">
-            <input
-              type="number"
-              name="price_expectation"
-              value={formData.price_expectation}
-              onChange={handleChange}
-              placeholder="₹"
-              className="w-full border border-slate-300 px-2 py-2 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </Field>
-
-          {/* Description */}
-          <Field icon={FileText} label="Description">
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={2}
-              placeholder="Package details"
-              className="w-full border border-slate-300 px-2 py-2 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </Field>
-
-          {/* Image */}
-          <Field icon={Image} label="Image">
-            <input
-              type="file"
-              name="images"
-              onChange={handleFileChange}
-              className="w-full text-sm border border-slate-300 px-2 py-1 rounded-md focus:ring-2 focus:ring-indigo-500"
-              accept="image/*"
-            />
-          </Field>
-          {preview && (
-            <div className="mt-2 flex justify-center">
-              <img
-                src={preview}
-                alt="Preview"
-                className="rounded-lg shadow max-h-24 w-24 object-cover border border-slate-200"
-              />
+          {/* Image Card */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 shadow-sm border border-purple-100">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="bg-purple-500 p-1.5 rounded-lg">
+                <Image size={16} className="text-white" />
+              </div>
+              <h3 className="text-base font-bold text-purple-800">Image</h3>
             </div>
-          )}
+            
+            <div className="flex gap-3 items-center">
+              <div className="flex-1">
+                <input
+                  type="file"
+                  name="images"
+                  onChange={handleFileChange}
+                  className="w-full text-xs border border-slate-300 px-3 py-2 rounded-md focus:ring-1 focus:ring-purple-500"
+                  accept="image/*"
+                />
+              </div>
+              
+              {preview && (
+                <div className="flex-shrink-0">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="rounded-lg shadow h-14 w-14 object-cover border border-slate-200"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
 
-          {/* Button */}
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-indigo-700 transition"
+            className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:scale-[1.01] hover:shadow-md transition-all duration-300 mt-2"
           >
             <Send size={16} />
-            Create
+            Create Shipment
           </button>
         </form>
 
         {/* Message */}
         {message && (
           <div
-            className={`mt-6 p-4 rounded-lg text-sm ${
+            className={`mt-6 p-3 rounded-lg text-xs ${
               message.startsWith("✅")
                 ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-700"
@@ -346,5 +400,4 @@ const CreatePackage = () => {
 };
 
 export default CreatePackage;
-
 

@@ -57,7 +57,7 @@ export default function ManageStaffVehicle() {
     }
   };
 
-  // Handle update submit
+  // Handle update
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -73,14 +73,14 @@ export default function ManageStaffVehicle() {
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
+    <div className="p-4 sm:p-8 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
         <FontAwesomeIcon icon={faTruck} className="text-blue-600" />
         Manage Vehicles & Staff
       </h1>
 
       {/* VEHICLE TABLE */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8 overflow-x-auto">
         <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
           <FontAwesomeIcon icon={faTruck} className="text-green-600" />
           Vehicle List
@@ -88,24 +88,24 @@ export default function ManageStaffVehicle() {
         <table className="w-full border rounded">
           <thead>
             <tr className="bg-gray-100 text-left">
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Number</th>
-              <th className="p-2 border">Model</th>
-              <th className="p-2 border">Capacity</th>
-              <th className="p-2 border">Wheels</th>
-              <th className="p-2 border text-center">Actions</th>
+              <th className="p-3 border">ID</th>
+              <th className="p-3 border">Number</th>
+              <th className="p-3 border">Model</th>
+              <th className="p-3 border">Capacity</th>
+              <th className="p-3 border">Wheels</th>
+              <th className="p-3 border text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {vehicles.length > 0 ? (
               vehicles.map((v) => (
                 <tr key={v.id} className="hover:bg-gray-50">
-                  <td className="p-2 border">{v.id}</td>
-                  <td className="p-2 border font-medium">{v.truck_number}</td>
-                  <td className="p-2 border">{v.truck_model}</td>
-                  <td className="p-2 border">{v.capacity}</td>
-                  <td className="p-2 border">{v.wheels}</td>
-                  <td className="p-2 border text-center space-x-2">
+                  <td className="p-3 border">{v.id}</td>
+                  <td className="p-3 border font-medium">{v.truck_number}</td>
+                  <td className="p-3 border">{v.truck_model}</td>
+                  <td className="p-3 border">{v.capacity}</td>
+                  <td className="p-3 border">{v.wheels}</td>
+                  <td className="p-3 border text-center space-x-2">
                     <button
                       onClick={() => {
                         setEditItem(v);
@@ -127,7 +127,7 @@ export default function ManageStaffVehicle() {
               ))
             ) : (
               <tr>
-                <td className="p-2 border text-center" colSpan="6">
+                <td className="p-3 border text-center" colSpan="6">
                   No vehicles found
                 </td>
               </tr>
@@ -137,7 +137,7 @@ export default function ManageStaffVehicle() {
       </div>
 
       {/* STAFF TABLE */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8 overflow-x-auto">
         <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
           <FontAwesomeIcon icon={faUsers} className="text-purple-600" />
           Staff List
@@ -145,34 +145,24 @@ export default function ManageStaffVehicle() {
         <table className="w-full border rounded">
           <thead>
             <tr className="bg-gray-100 text-left">
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Role</th>
-              <th className="p-2 border">Phone</th>
-              <th className="p-2 border">Vehicle</th>
-              <th className="p-2 border text-center">Actions</th>
+              <th className="p-3 border">ID</th>
+              <th className="p-3 border">Name</th>
+              <th className="p-3 border">Role</th>
+              <th className="p-3 border">Phone</th>
+              <th className="p-3 border">Vehicle</th>
+              <th className="p-3 border text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {staff.length > 0 ? (
               staff.map((s) => (
                 <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="p-2 border">{s.id}</td>
-                  <td className="p-2 border font-medium">{s.name}</td>
-                  <td className="p-2 border">
-                    {s.role === "driver" ? (
-                      <span className="text-blue-600 font-semibold flex items-center gap-1">
-                        <FontAwesomeIcon icon={faUserTie} /> Driver
-                      </span>
-                    ) : (
-                      <span className="text-gray-700 flex items-center gap-1">
-                        <FontAwesomeIcon icon={faUser} /> Helper
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-2 border">{s.contact}</td>
-                  <td className="p-2 border">{s.vehicle?.truck_number}</td>
-                  <td className="p-2 border text-center space-x-2">
+                  <td className="p-3 border">{s.id}</td>
+                  <td className="p-3 border font-medium">{s.name}</td>
+                  <td className="p-3 border capitalize">{s.role}</td>
+                  <td className="p-3 border">{s.contact}</td>
+                  <td className="p-3 border">{s.vehicle?.truck_number || "Unassigned"}</td>
+                  <td className="p-3 border text-center space-x-2">
                     <button
                       onClick={() => {
                         setEditItem(s);
@@ -194,7 +184,7 @@ export default function ManageStaffVehicle() {
               ))
             ) : (
               <tr>
-                <td className="p-2 border text-center" colSpan="6">
+                <td className="p-3 border text-center" colSpan="6">
                   No staff found
                 </td>
               </tr>
@@ -203,8 +193,8 @@ export default function ManageStaffVehicle() {
         </table>
       </div>
 
-      {/* MERGED ASSIGNMENT TABLE */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      {/* VEHICLE & STAFF DETAILS TABLE */}
+      <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
         <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
           <FontAwesomeIcon icon={faUsersCog} className="text-indigo-600" />
           Vehicle & Staff Details
@@ -212,50 +202,53 @@ export default function ManageStaffVehicle() {
         <table className="w-full border rounded">
           <thead>
             <tr className="bg-gradient-to-r from-blue-500 to-blue-700 text-white">
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Vehicle Number</th>
-              <th className="p-2 border">Model</th>
-              <th className="p-2 border">Capacity</th>
-              <th className="p-2 border">Wheels</th>
-              <th className="p-2 border">Staff Name</th>
-              <th className="p-2 border">Contact</th>
-              <th className="p-2 border">Role</th>
+              <th className="p-3 border">Vehicle ID</th>
+              <th className="p-3 border">Vehicle Number</th>
+              <th className="p-3 border">Model</th>
+              <th className="p-3 border">Capacity</th>
+              <th className="p-3 border">Wheels</th>
+              <th className="p-3 border">Staff Name</th>
+              <th className="p-3 border">Contact</th>
+              <th className="p-3 border">Role</th>
             </tr>
           </thead>
           <tbody>
             {vehicles.length > 0 ? (
-              vehicles.map((v) =>
-                staff
-                  .filter((s) => s.vehicle?.id === v.id)
-                  .map((s) => (
-                    <tr
-                      key={`${v.id}-${s.id}`}
-                      className="hover:bg-blue-50 transition duration-200"
-                    >
-                      <td className="p-2 border">{v.id}</td>
-                      <td className="p-2 border font-medium">{v.truck_number}</td>
-                      <td className="p-2 border">{v.truck_model}</td>
-                      <td className="p-2 border">{v.capacity}</td>
-                      <td className="p-2 border">{v.wheels}</td>
-                      <td className="p-2 border flex items-center gap-2">
-                        <FontAwesomeIcon icon={faUser} className="text-blue-600" />
-                        {s.name}
-                      </td>
-                      <td className="p-2 border flex items-center gap-2">
-                        <FontAwesomeIcon icon={faPhone} className="text-green-600" />
-                        {s.contact}
-                      </td>
-                      <td className="p-2 border flex items-center gap-2">
-                        <FontAwesomeIcon icon={faIdCard} className="text-purple-600" />
-                        {s.role}
+              vehicles.map((v) => {
+                const assignedStaff = staff.filter(
+                  (s) => s.vehicle && s.vehicle.id === v.id
+                );
+                if (assignedStaff.length === 0) {
+                  return (
+                    <tr key={v.id} className="hover:bg-gray-50">
+                      <td className="p-3 border">{v.id}</td>
+                      <td className="p-3 border">{v.truck_number}</td>
+                      <td className="p-3 border">{v.truck_model}</td>
+                      <td className="p-3 border">{v.capacity}</td>
+                      <td className="p-3 border">{v.wheels}</td>
+                      <td className="p-3 border text-gray-400" colSpan="3">
+                        No staff assigned
                       </td>
                     </tr>
-                  ))
-              )
+                  );
+                }
+                return assignedStaff.map((s) => (
+                  <tr key={`${v.id}-${s.id}`} className="hover:bg-blue-50">
+                    <td className="p-3 border">{v.id}</td>
+                    <td className="p-3 border">{v.truck_number}</td>
+                    <td className="p-3 border">{v.truck_model}</td>
+                    <td className="p-3 border">{v.capacity}</td>
+                    <td className="p-3 border">{v.wheels}</td>
+                    <td className="p-3 border">{s.name}</td>
+                    <td className="p-3 border">{s.contact}</td>
+                    <td className="p-3 border capitalize">{s.role}</td>
+                  </tr>
+                ));
+              })
             ) : (
               <tr>
-                <td className="p-2 border text-center" colSpan="8">
-                  No assignments found
+                <td className="p-3 border text-center" colSpan="8">
+                  No data found
                 </td>
               </tr>
             )}
@@ -265,8 +258,8 @@ export default function ManageStaffVehicle() {
 
       {/* UPDATE MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-3 right-3 text-gray-600 hover:text-black"
@@ -286,7 +279,7 @@ export default function ManageStaffVehicle() {
                       setEditItem({ ...editItem, truck_number: e.target.value })
                     }
                     placeholder="Truck Number"
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border rounded"
                   />
                   <input
                     type="text"
@@ -295,7 +288,7 @@ export default function ManageStaffVehicle() {
                       setEditItem({ ...editItem, truck_model: e.target.value })
                     }
                     placeholder="Truck Model"
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border rounded"
                   />
                   <input
                     type="number"
@@ -304,7 +297,7 @@ export default function ManageStaffVehicle() {
                       setEditItem({ ...editItem, capacity: e.target.value })
                     }
                     placeholder="Capacity"
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border rounded"
                   />
                   <input
                     type="number"
@@ -313,7 +306,7 @@ export default function ManageStaffVehicle() {
                       setEditItem({ ...editItem, wheels: e.target.value })
                     }
                     placeholder="Wheels"
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border rounded"
                   />
                 </>
               ) : (
@@ -325,14 +318,14 @@ export default function ManageStaffVehicle() {
                       setEditItem({ ...editItem, name: e.target.value })
                     }
                     placeholder="Staff Name"
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border rounded"
                   />
                   <select
                     value={editItem.role}
                     onChange={(e) =>
                       setEditItem({ ...editItem, role: e.target.value })
                     }
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border rounded"
                   >
                     <option value="driver">Driver</option>
                     <option value="helper">Helper</option>
@@ -344,13 +337,13 @@ export default function ManageStaffVehicle() {
                       setEditItem({ ...editItem, contact: e.target.value })
                     }
                     placeholder="Phone"
-                    className="w-full p-2 border rounded"
+                    className="w-full p-3 border rounded"
                   />
                 </>
               )}
               <button
                 type="submit"
-                className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                className="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 font-medium"
               >
                 Save Changes
               </button>

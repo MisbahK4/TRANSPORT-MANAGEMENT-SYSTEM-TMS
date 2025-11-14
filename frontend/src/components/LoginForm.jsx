@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaHome, FaEye, FaEyeSlash } from "react-icons/fa";
 
-const API_BASE = process.env.NODE_ENV === "development"
-  ? process.env.REACT_APP_API_BASE_URL_LOCAL
-  : process.env.REACT_APP_API_BASE_URL_DEPLOY;
+const API_BASE =
+  process.env.NODE_ENV === "development"
+    ? process.env.REACT_APP_API_BASE_URL_LOCAL
+    : process.env.REACT_APP_API_BASE_URL_DEPLOY;
 
 const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
   const navigate = useNavigate();
@@ -14,12 +15,14 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Handle input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
-    setErrors((p) => ({ ...p, [name]: "" }));
+    setErrors((p) => ({ ...p, [name]: "", general: "" }));
   };
 
+  // Frontend validation
   const validateForm = () => {
     const newErr = {};
     if (!formData.username.trim()) newErr.username = "Username is required.";
@@ -27,6 +30,7 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
     return newErr;
   };
 
+  // Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -39,12 +43,8 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
     setLoading(true);
     try {
       const resp = await axios.post(`${API_BASE}login/`, formData);
- 
-      // Django SimpleJWT default endpoint: /api/token/
 
       const { access, refresh, is_owner, is_transporter } = resp.data;
-
-      // ✅ Store correctly for api.js
       localStorage.setItem("access", access);
       localStorage.setItem("refresh", refresh);
 
@@ -58,11 +58,39 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
     } catch (err) {
       const respData = err?.response?.data;
       const newErrors = {};
+
+      // ✅ Handle backend validation field errors
+      if (respData?.username) newErrors.username = respData.username[0];
+      if (respData?.password) newErrors.password = respData.password[0];
+
+      // ✅ Handle "detail" message from JWT/DRF
       if (respData?.detail) {
-        newErrors.general = respData.detail;
-      } else {
+        const detail = respData.detail.toLowerCase();
+
+        if (detail.includes("username") && !newErrors.username) {
+          newErrors.username = "Username not found.";
+        } else if (detail.includes("password") && !newErrors.password) {
+          newErrors.password = "Incorrect password.";
+        } else if (detail.includes("no active account")) {
+          newErrors.general = "Invalid username or password.";
+        } else {
+          newErrors.general = respData.detail; // fallback
+        }
+      }
+
+      // ✅ Catch weird/short messages like "U" or "I"
+      if (!respData?.detail && typeof respData === "string") {
+        if (respData.toLowerCase().startsWith("u"))
+          newErrors.username = "Invalid username.";
+        else if (respData.toLowerCase().startsWith("i"))
+          newErrors.password = "Incorrect password.";
+        else newErrors.general = "Invalid login details.";
+      }
+
+      if (Object.keys(newErrors).length === 0) {
         newErrors.general = "Login failed. Please check credentials.";
       }
+
       setErrors(newErrors);
     } finally {
       setLoading(false);
@@ -77,9 +105,12 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
           onSubmit={handleSubmit}
           className="w-full max-w-md bg-white shadow-xl rounded-xl p-8 space-y-6 border border-gray-200"
         >
-          <h2 className="text-3xl font-bold text-gray-800 text-center">TMS Login</h2>
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
+            TMS Login
+          </h2>
           <p className="text-center text-gray-500">Open your dashboard</p>
 
+          {/* ✅ General Error */}
           {errors.general && (
             <div className="bg-red-100 text-red-700 px-4 py-2 rounded text-sm text-center">
               {errors.general}
@@ -88,7 +119,9 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
 
           {/* Username */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Username</label>
+            <label className="block text-gray-700 font-medium mb-1">
+              Username
+            </label>
             <input
               name="username"
               value={formData.username}
@@ -107,7 +140,9 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
 
           {/* Password */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Password</label>
+            <label className="block text-gray-700 font-medium mb-1">
+              Password
+            </label>
             <div className="relative">
               <input
                 name="password"
@@ -134,6 +169,7 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
             )}
           </div>
 
+          {/* Buttons */}
           <button
             type="submit"
             disabled={loading}
@@ -156,7 +192,9 @@ const LoginForm = ({ setToken, setIsOwner, setIsTransporter }) => {
       <div className="flex-1 bg-gradient-to-br from-indigo-600 to-blue-600 text-white flex items-center justify-center px-6 py-12">
         <div className="text-center space-y-6">
           <h2 className="text-4xl font-bold">New to TMS?</h2>
-          <p className="text-lg">Register now to streamline your transport operations.</p>
+          <p className="text-lg">
+            Register now to streamline your transport operations.
+          </p>
           <a
             href="/register"
             className="inline-block bg-white text-indigo-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-100 transition-all duration-300"

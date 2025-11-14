@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    Registerview, MarketplaceViewSet, Packageviewset, OfferViewSet, 
+    RegisterView, MarketplaceViewSet, Packageviewset, OfferViewSet, 
     ChatMessageViewSet, InvoiceViewSet, TrackingViewSet, 
     DashboardAnalytics, MyTokenObtainPairView, CurrentUserView,
     VehicleViewSet, StaffViewSet,
@@ -20,7 +20,7 @@ router.register(r"staff", StaffViewSet, basename="staff")
 
 urlpatterns = [
     path('api/users/', CurrentUserView.as_view(), name='current-user'),
-    path('api/register/', Registerview.as_view(), name='register'),
+    path('api/register/', RegisterView.as_view(), name='register'),
     path('api/login/', MyTokenObtainPairView.as_view(), name='login'),
     
     # Dashboards

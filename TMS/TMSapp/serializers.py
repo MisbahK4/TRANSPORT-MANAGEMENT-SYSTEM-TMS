@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed,ValidationError
 from .models import Package, Chat_Message, Offer, Invoice, Tracking, Vehicle, Staff
 from django.utils import timezone
 User = get_user_model()
@@ -13,7 +13,9 @@ User = get_user_model()
 # -------------------
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
     password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
@@ -24,15 +26,35 @@ class RegisterSerializer(serializers.ModelSerializer):
             'address', 'state', 'country'
         ]
 
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
+
     def validate(self, attrs):
+        # ✅ Check password match
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({'password': 'Passwords do not match.'})
+
+        # ✅ Role-based company_name check
+        is_owner = attrs.get('is_owner', False)
+        is_transporter = attrs.get('is_transporter', False)
+        company_name = attrs.get('company_name', '').strip()
+
+        # company_name required only for transporter
+        if is_transporter and not company_name:
+            raise serializers.ValidationError({
+                'company_name': 'Company name is required for transporters.'
+            })
+
+        # owner can skip company_name (no error)
         return attrs
 
     def create(self, validated_data):
         validated_data.pop('password2')
         is_owner = validated_data.pop('is_owner', False)
         is_transporter = validated_data.pop('is_transporter', False)
+
         user = User.objects.create_user(
             **validated_data,
             is_owner=bool(is_owner),
@@ -73,10 +95,19 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
-        data = super().validate(attrs)
-        user = self.user
+        username =  attrs.get('username')
+        password = attrs.get('password')
+
+        try :
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise ValidationError({'username': 'Username not found'})  
+        if not user.check_password(password):
+            raise ValidationError({"password":'Incorrect password'})  
         if not user.is_active:
-            raise AuthenticationFailed("User account is disabled.")
+            raise ValidationError({"error":"User account is disabled."})
+        
+        data = super().validate(attrs)
         data['is_owner'] = user.is_owner
         data['is_transporter'] = user.is_transporter
         return data

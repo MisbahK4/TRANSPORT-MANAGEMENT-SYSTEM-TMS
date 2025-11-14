@@ -83,7 +83,7 @@ export default function OwnerDashboard() {
             </div>
             {sidebarOpen && (
               <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-400">
-                TruckBase
+                Tranzio
               </h2>
             )}
           </div>

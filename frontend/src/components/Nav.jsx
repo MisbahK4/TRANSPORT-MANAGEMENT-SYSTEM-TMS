@@ -52,7 +52,7 @@ const Nav = () => {
             className="text-2xl font-bold text-blue-700 flex items-center gap-2 group"
           >
             <span className="bg-gradient-to-r from-blue-600 to-blue-800 text-transparent bg-clip-text">
-              TruckBase TMS
+              Tranzio
             </span>
             <span className="block w-2 h-2 rounded-full bg-blue-600 transform transition-transform duration-300 group-hover:scale-150"></span>
           </Link>

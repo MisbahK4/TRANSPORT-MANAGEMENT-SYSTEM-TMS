@@ -1,16 +1,16 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum, Q
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login ,get_user_model
 from django.utils import timezone
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets, permissions,decorators,response
-from rest_framework.decorators import action
+from rest_framework.decorators import action,api_view,permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.exceptions import PermissionDenied
 
 from .models import Package, Offer, Chat_Message, Invoice, Tracking, Vehicle, Staff,ChatRoom
@@ -24,7 +24,7 @@ from django.http import FileResponse
 from django.core.mail import EmailMessage
 from .utils import generate_invoice_pdf, send_invoice_email
 from .permissions import isOwnerOrReadonly
-
+User = get_user_model()
 
 
 class CurrentUserView(APIView):
@@ -41,8 +41,8 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 
-class Registerview(APIView):
-    permission_classes = [permissions.AllowAny]  
+class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -52,30 +52,18 @@ class Registerview(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Login View (if not using JWT)
-class Loginview(APIView):
-    permission_classes = [permissions.AllowAny]
 
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = authenticate(
-                username=serializer.validated_data['username'],
-                password=serializer.validated_data['password']
-            )
-            if user:
-                login(request, user)
-                return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def check_username(request):
+    username = request.query_params.get('username')
+    if not username:
+        return Response({'error': 'Username is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    exists = User.objects.filter(username=username).exists()
+    return Response({'exists': exists})
 
 
-# Package CRUD
-
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
-from django.db.models import Q
 
 class Packageviewset(viewsets.ModelViewSet):
     queryset = Package.objects.all().order_by('-create_at')
